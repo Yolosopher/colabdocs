@@ -23,7 +23,7 @@ const Document = async ({ params: { id } }: DocumentProps) => {
   if (!room) redirect("/");
 
   const userIds = Object.keys(room.usersAccesses);
-  const users = await getClerkUsers({ emails: userIds });
+  const users = await getClerkUsers({ userIds });
   if (!users) redirect("/");
 
   const usersData = users.map((user) => ({
