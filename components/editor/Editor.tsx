@@ -115,11 +115,13 @@ export function Editor({
             </div>
           )}
 
-          <LiveblocksPlugin>
-            <FloatingComposer className="w-[350px]" />
-            <FloatingThreads threads={threads} />
-            <Comments />
-          </LiveblocksPlugin>
+          {!temporaryColorState && (
+            <LiveblocksPlugin>
+              <FloatingComposer className="w-[350px]" />
+              <FloatingThreads threads={threads} />
+              <Comments />
+            </LiveblocksPlugin>
+          )}
         </div>
       </div>
     </LexicalComposer>

@@ -8,7 +8,7 @@ import {
   MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { generateDoc, generatePDF } from "@/lib/exportAsPDF";
+import { generateDoc, generatePDF } from "@/lib/exportAs";
 import { useEffect } from "react";
 
 type MenuBarPluginProps = {
@@ -72,7 +72,7 @@ const MenuBarPlugin = ({
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem onClick={exportAsDOC}>
-              <span>As .DOCX</span>
+              <span>As .DOC</span>
             </MenubarItem>
             <MenubarSeparator />
             <MenubarItem disabled>Print</MenubarItem>
