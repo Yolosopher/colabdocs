@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { liveblocks } from "../liveblocks";
 import { getAccessType } from "../utils";
 import { redirect } from "next/navigation";
+import { findClerkUser, getClerkUsers } from "./user.actions";
+import { RoomData } from "@liveblocks/node";
 
 export const createDocument = async ({
   userId,
@@ -45,10 +47,7 @@ export const getDocument = async ({
   userId: string;
 }) => {
   try {
-    console.log("roomId", roomId);
-    console.log("userId", userId);
     const room = await liveblocks.getRoom(roomId);
-    console.log("room", room);
 
     // check if user has access
     const hasAccess = Object.keys(room.usersAccesses).includes(userId);
@@ -67,13 +66,6 @@ export const getDocuments = async (email: string) => {
     const rooms = await liveblocks.getRooms({
       userId: email,
     });
-
-    // TODO: Bring back access control later
-    // check if user has access
-    // const hasAccess = Object.keys(room.usersAccesses).includes(userId);
-    // if (!hasAccess) {
-    //   throw new Error("You don't have access to this document");
-    // }
 
     return rooms;
   } catch (error) {
@@ -102,8 +94,13 @@ export const updateDocumentAccess = async ({
   email,
   userType,
   updatedBy,
-}: ShareDocumentParams) => {
+}: ShareDocumentParams): Promise<{ error: string | null }> => {
   try {
+    // check if user exists
+    const foundUser = await findClerkUser(email);
+    if (!foundUser) {
+      throw new Error("User not found");
+    }
     const usersAccesses: RoomAccesses = {
       [email]: getAccessType(userType) as AccessType,
     };
@@ -113,7 +110,6 @@ export const updateDocumentAccess = async ({
     });
 
     if (updatedRoom) {
-      // TODO: Send a notification to the user
       const notificationId = nanoid();
 
       await liveblocks.triggerInboxNotification({
@@ -132,9 +128,13 @@ export const updateDocumentAccess = async ({
     }
 
     revalidatePath(`/documents/${roomId}`);
-    return updatedRoom;
+    return {
+      error: null,
+    };
   } catch (error) {
-    console.log(`Error happened while updating a room access: ${error}`);
+    return {
+      error: `Error happened while updating a room access: ${error}`,
+    };
   }
 };
 

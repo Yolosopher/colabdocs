@@ -17,9 +17,6 @@ const CollaborativeRoom = ({
   currentUserType,
   users,
 }: CollaborativeRoomProps) => {
-  console.log("roomId", roomId);
-  console.log("roomMetadata", roomMetadata);
-  console.log("currentUserType", currentUserType);
   const [editing, setEditing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
   const [documentTitle, setDocumentTitle] = useState<string>(
@@ -134,7 +131,11 @@ const CollaborativeRoom = ({
               </SignedIn>
             </div>
           </Header>
-          <Editor roomId={roomId} currentUserType={currentUserType!} />
+          <Editor
+            roomId={roomId}
+            currentUserType={currentUserType!}
+            roomMetadata={roomMetadata}
+          />
         </div>
       </ClientSideSuspense>
     </RoomProvider>

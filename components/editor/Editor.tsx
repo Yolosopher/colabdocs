@@ -9,7 +9,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
-import React from "react";
+import React, { useState } from "react";
 import {
   FloatingComposer,
   FloatingThreads,
@@ -22,6 +22,9 @@ import FloatingToolbarPlugin from "./plugins/FloatingToolbarPlugin";
 import { useThreads } from "@liveblocks/react/suspense";
 import Comments from "../Comments";
 import { DeleteModal } from "../DeleteModal";
+import MenuBarPlugin from "./plugins/MenuBarPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
+import { $generateHtmlFromNodes } from "@lexical/html";
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -34,10 +37,15 @@ function Placeholder() {
 export function Editor({
   roomId,
   currentUserType,
+  roomMetadata,
 }: {
   roomId: string;
   currentUserType: UserType;
+  roomMetadata: RoomMetadata;
 }) {
+  console.log(roomMetadata);
+  const [htmlContent, setHtmlContent] = useState<string>("");
+
   const status = useEditorStatus();
   const { threads } = useThreads();
 
@@ -55,8 +63,20 @@ export function Editor({
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="editor-container size-full">
-        <div className="toolbar-wrapper flex min-w-full justify-between">
-          <ToolbarPlugin />
+        <div className="toolbar-wrapper flex min-w-full justify-between items-center">
+          <div className="flex items-center gap-2 py-2">
+            {roomMetadata && (
+              <MenuBarPlugin
+                htmlContent={htmlContent}
+                font="Inter"
+                roomInfo={{
+                  title: roomMetadata.title,
+                  email: roomMetadata.email,
+                }}
+              />
+            )}
+            <ToolbarPlugin />
+          </div>
           {currentUserType === "editor" && <DeleteModal roomId={roomId} />}
         </div>
 
@@ -73,6 +93,14 @@ export function Editor({
                 ErrorBoundary={LexicalErrorBoundary}
               />
               {currentUserType === "editor" && <FloatingToolbarPlugin />}
+              <OnChangePlugin
+                onChange={(editorState, editor) => {
+                  editorState.read(() => {
+                    const html = $generateHtmlFromNodes(editor);
+                    setHtmlContent(html);
+                  });
+                }}
+              />
               <HistoryPlugin />
               <AutoFocusPlugin />
             </div>

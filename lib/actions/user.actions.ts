@@ -3,6 +3,22 @@
 import { clerkClient } from "@clerk/nextjs/server";
 import { liveblocks } from "../liveblocks";
 
+export const findClerkUser = async (email: string) => {
+  try {
+    const { data } = await clerkClient.users.getUserList({
+      emailAddress: [email],
+    });
+
+    if (!data.length) {
+      return null;
+    }
+
+    return data[0];
+  } catch (error) {
+    console.log(`Error fetching user: ${error}`);
+  }
+};
+
 export const getClerkUsers = async ({ userIds }: { userIds: string[] }) => {
   try {
     const { data } = await clerkClient.users.getUserList({

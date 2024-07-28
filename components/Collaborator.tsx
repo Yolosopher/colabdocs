@@ -7,6 +7,7 @@ import {
   removeCollaborator,
   updateDocumentAccess,
 } from "@/lib/actions/room.actions";
+import { useToast } from "./ui/use-toast";
 
 const Collaborator = ({
   collaborator,
@@ -15,6 +16,7 @@ const Collaborator = ({
   roomId,
   user,
 }: CollaboratorProps) => {
+  const { toast } = useToast();
   const [userType, setUserType] = useState<UserType>(
     collaborator.userType || "viewer"
   );
@@ -23,12 +25,21 @@ const Collaborator = ({
   const shareDocumentHandler = async (type: string) => {
     setLoading(true);
 
-    await updateDocumentAccess({
+    const result = await updateDocumentAccess({
       email: collaborator.email,
       roomId,
       userType: type as UserType,
       updatedBy: user,
     });
+
+    if (result.error) {
+      toast({
+        title: result.error,
+        duration: 1000 * 60,
+        variant: "destructive",
+        className: "dark",
+      });
+    }
 
     setLoading(false);
   };

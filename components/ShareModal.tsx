@@ -17,6 +17,7 @@ import { Input } from "./ui/input";
 import UserTypeSelector from "./UserTypeSelector";
 import Collaborator from "./Collaborator";
 import { updateDocumentAccess } from "@/lib/actions/room.actions";
+import { useToast } from "./ui/use-toast";
 
 const ShareModal = ({
   collaborators,
@@ -24,6 +25,7 @@ const ShareModal = ({
   currentUserType,
   roomId,
 }: ShareDocumentDialogProps) => {
+  const { toast } = useToast();
   const user = useSelf();
 
   const [open, setOpen] = useState<boolean>(false);
@@ -35,12 +37,21 @@ const ShareModal = ({
   const shareDocumentHandler = async () => {
     setLoading(true);
 
-    await updateDocumentAccess({
+    const result = await updateDocumentAccess({
       email,
       roomId,
       userType: userType as UserType,
       updatedBy: user.info,
     });
+
+    if (result.error) {
+      toast({
+        title: result.error,
+        duration: 1000 * 60,
+        variant: "destructive",
+        className: "dark",
+      });
+    }
 
     setLoading(false);
   };
