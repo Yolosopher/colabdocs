@@ -20,6 +20,7 @@ type MenuBarPluginProps = {
     email: string;
     title: string;
   };
+  handlePrint: () => void;
 };
 
 const MenuBarPlugin = ({
@@ -28,6 +29,7 @@ const MenuBarPlugin = ({
   rootElement,
   font,
   roomInfo,
+  handlePrint,
 }: MenuBarPluginProps) => {
   const exportAsPDF = async () => {
     setTemporaryColorState("black");
@@ -75,7 +77,7 @@ const MenuBarPlugin = ({
               <span>As .DOC</span>
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarItem disabled>Print</MenubarItem>
+            <MenubarItem onClick={handlePrint}>Print</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

@@ -9,7 +9,7 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
 import {
   FloatingComposer,
   FloatingThreads,
@@ -24,7 +24,7 @@ import Comments from "../Comments";
 import { DeleteModal } from "../DeleteModal";
 import MenuBarPlugin from "./plugins/MenuBarPlugin";
 import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
-import { $generateHtmlFromNodes } from "@lexical/html";
+import { useReactToPrint } from "react-to-print";
 
 // Catch any errors that occur during Lexical updates and log them
 // or throw them as needed. If you don't throw them, Lexical will
@@ -59,6 +59,10 @@ export function Editor({
     editable: currentUserType === "editor",
   });
 
+  const componentRef = useRef<HTMLDivElement | null>(null);
+  const handlePrint = useReactToPrint({
+    content: () => componentRef?.current,
+  });
   return (
     <LexicalComposer initialConfig={initialConfig}>
       <div className="editor-container size-full">
@@ -74,6 +78,7 @@ export function Editor({
                   title: roomMetadata.title,
                   email: roomMetadata.email,
                 }}
+                handlePrint={handlePrint}
               />
             )}
             <ToolbarPlugin />
@@ -85,7 +90,10 @@ export function Editor({
           {status === "not-loaded" || status === "loading" ? (
             <Loader />
           ) : (
-            <div className="editor-inner min-h-[1100px] relative mb-5 h-fit w-full max-w-[800px] shadow-md lg:mb-10">
+            <div
+              className="editor-inner min-h-[1100px] relative mb-5 h-fit w-full max-w-[800px] shadow-md lg:mb-10"
+              ref={componentRef}
+            >
               <RichTextPlugin
                 contentEditable={
                   <ContentEditable
