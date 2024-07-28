@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 "use client";
 import {
   Menubar,
@@ -7,10 +8,13 @@ import {
   MenubarSeparator,
   MenubarTrigger,
 } from "@/components/ui/menubar";
-import { generatePDF } from "@/lib/actions/export.actions";
+import { generateDoc, generatePDF } from "@/lib/exportAsPDF";
+import { useEffect } from "react";
 
 type MenuBarPluginProps = {
-  htmlContent: string;
+  temporaryColorState: string;
+  setTemporaryColorState: (color: string) => void;
+  rootElement: HTMLElement | null;
   font: string;
   roomInfo: {
     email: string;
@@ -18,16 +22,45 @@ type MenuBarPluginProps = {
   };
 };
 
-const MenuBarPlugin = ({ htmlContent, font, roomInfo }: MenuBarPluginProps) => {
+const MenuBarPlugin = ({
+  temporaryColorState,
+  setTemporaryColorState,
+  rootElement,
+  font,
+  roomInfo,
+}: MenuBarPluginProps) => {
   const exportAsPDF = async () => {
-    generatePDF({
+    setTemporaryColorState("black");
+  };
+  const exportAsDOC = async () => {
+    generateDoc({
       title: roomInfo.title,
       creator: roomInfo.email,
-      htmlContent,
+      rootElement: rootElement,
       font,
     });
   };
-  const exportAsDOCX = async () => {};
+
+  useEffect(() => {
+    const handler = async () => {
+      if (temporaryColorState) {
+        try {
+          await generatePDF({
+            title: roomInfo.title,
+            creator: roomInfo.email,
+            rootElement: rootElement,
+            font,
+          });
+        } catch (error) {
+          console.error(error);
+        } finally {
+          setTemporaryColorState("");
+        }
+      }
+    };
+    handler();
+  }, [temporaryColorState]);
+
   return (
     <div className="dark">
       <Menubar className="text-white">
@@ -38,11 +71,11 @@ const MenuBarPlugin = ({ htmlContent, font, roomInfo }: MenuBarPluginProps) => {
               <span>As .PDF</span>
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarItem onClick={exportAsDOCX}>
+            <MenubarItem onClick={exportAsDOC}>
               <span>As .DOCX</span>
             </MenubarItem>
             <MenubarSeparator />
-            <MenubarItem>Print</MenubarItem>
+            <MenubarItem disabled>Print</MenubarItem>
           </MenubarContent>
         </MenubarMenu>
       </Menubar>

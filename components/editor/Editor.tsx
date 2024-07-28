@@ -43,9 +43,8 @@ export function Editor({
   currentUserType: UserType;
   roomMetadata: RoomMetadata;
 }) {
-  console.log(roomMetadata);
-  const [htmlContent, setHtmlContent] = useState<string>("");
-
+  const [rootElement, setRootElement] = useState<HTMLElement | null>(null);
+  const [temporaryColorState, setTemporaryColorState] = useState<string>("");
   const status = useEditorStatus();
   const { threads } = useThreads();
 
@@ -67,8 +66,10 @@ export function Editor({
           <div className="flex items-center gap-2 py-2">
             {roomMetadata && (
               <MenuBarPlugin
-                htmlContent={htmlContent}
-                font="Inter"
+                setTemporaryColorState={setTemporaryColorState}
+                temporaryColorState={temporaryColorState}
+                rootElement={rootElement}
+                font="Helvetica"
                 roomInfo={{
                   title: roomMetadata.title,
                   email: roomMetadata.email,
@@ -87,7 +88,12 @@ export function Editor({
             <div className="editor-inner min-h-[1100px] relative mb-5 h-fit w-full max-w-[800px] shadow-md lg:mb-10">
               <RichTextPlugin
                 contentEditable={
-                  <ContentEditable className="editor-input h-full  !outline-none" />
+                  <ContentEditable
+                    className="editor-input h-full  !outline-none"
+                    style={{
+                      color: `${temporaryColorState}`,
+                    }}
+                  />
                 }
                 placeholder={<Placeholder />}
                 ErrorBoundary={LexicalErrorBoundary}
@@ -96,8 +102,11 @@ export function Editor({
               <OnChangePlugin
                 onChange={(editorState, editor) => {
                   editorState.read(() => {
-                    const html = $generateHtmlFromNodes(editor);
-                    setHtmlContent(html);
+                    const rootElement = editor.getRootElement();
+                    setRootElement(rootElement);
+
+                    // const html = $generateHtmlFromNodes(editor);
+                    // setRootElement(html);
                   });
                 }}
               />
